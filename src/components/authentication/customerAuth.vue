@@ -2,8 +2,11 @@
     <div class="d-flex justify-content-center pt-5 mt-5">
         <div class="card w-25">
           <div class="card-body">
-            <div class="alert alert-primary" v-if="showErrorMessage" role="alert">
+            <div class="alert alert-primary" v-if="showSuccessMessage" role="alert">
               you are successfully register please login
+            </div>
+            <div class="alert alert-primary" v-if="showErrorMessage" role="alert">
+              {{msg}}
             </div>
               <h4 class="d-flex justify-content-center" v-if="isLogin">customer Login </h4>
               <h4 class="d-flex justify-content-center" v-if="!isLogin">customer Registeration </h4>
@@ -45,7 +48,9 @@ export default {
             fullname:null,
             password:null,
             isLogin:false,
-            showErrorMessage:false
+            showErrorMessage:false,
+            showSuccessMessage:false,
+            msg:null
         }
     },
     validations:{
@@ -73,18 +78,31 @@ export default {
           if(!this.isLogin){
             console.log("register")
             axios.post(this.$store.state.apis.registerCustomer,{fullName:this.fullname,email:this.email,password:this.password}).then(res=>{
+              if(res.data.code == 3){
               console.log(res)
-              this.showErrorMessage=true
+              this.showSuccessMessage=true
               this.isLogin=true
+              }
+              else{
+                this.showErrorMessage=true
+                this.msg=res.data.message
+              }
             })
           }
           else{
             console.log("Login")
              axios.post(this.$store.state.apis.customerLogin,{email:this.email,password:this.password}).then(res=>{
               console.log(res)
+              if(res.data.code == 3){
               localStorage.setItem("customerAuthToken",res.data.token)
               this.$store.state.isCustomerAuth=true
               this.$router.push('/customer_trans')
+              }
+              else{
+                this.msg=res.data.message
+                this.showErrorMessage=true
+                this.showSuccessMessage=false
+              }
             })
           }
         }

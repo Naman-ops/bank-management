@@ -2,8 +2,11 @@
     <div class="d-flex justify-content-center pt-5 mt-5">
         <div class="card w-25">
           <div class="card-body">
-            <div class="alert alert-primary" v-if="showErrorMessage" role="alert">
+            <div class="alert alert-primary" v-if="showSuccessMessage" role="alert">
               you are successfully register please login
+            </div>
+            <div class="alert alert-primary" v-if="showErrorMessage" role="alert">
+              {{msg}}
             </div>
               <h4 class="d-flex justify-content-center" v-if="isLogin">Banker Login </h4>
               <h4 class="d-flex justify-content-center" v-if="!isLogin">Banker Registeration </h4>
@@ -45,7 +48,9 @@ export default {
             fullname:null,
             password:null,
             isLogin:false,
-            showErrorMessage:false
+            showSuccessMessage:false,
+            showErrorMessage:false,
+            msg:null
         }
     },
     validations:{
@@ -74,16 +79,32 @@ export default {
             console.log("register")
             axios.post(this.$store.state.apis.registerBanker,{fullName:this.fullname,email:this.email,password:this.password}).then(res=>{
               console.log(res)
-              this.showErrorMessage=true
+              if(res.data.code == 3){
+              this.showSuccessMessage=true
+              this.showErrorMessage=false
               this.isLogin=true
+              }
+              else{
+                this.showSuccessMessage=false
+                this.showErrorMessage=true
+                this.msg=res.data.message
+              }
+              
             })
           }
           else{
             console.log("Login")
              axios.post(this.$store.state.apis.bankerLogin,{email:this.email,password:this.password}).then(res=>{
               console.log(res)
+              if(res.data.code == 3){
               localStorage.setItem("bankerAuthToken",res.data.token)
               this.$router.push('/customers_details')
+              }
+              else{
+                this.showSuccessMessage=false
+                this.showErrorMessage=true
+                this.msg=res.data.message
+              }
             })
           }
         }
